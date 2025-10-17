@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>⚡ Catch the Energy ⚡</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: radial-gradient(circle at center, #0f2027, #203a43, #2c5364);
+    overflow: hidden;
+    font-family: "Poppins", sans-serif;
+    color: white;
+    text-align: center;
+  }
+  h1 { margin: 10px; }
+
+  #game {
+    position: relative;
+    width: 100vw;
+    height: 80vh;
+    border: 3px solid white;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.05);
+    transition: box-shadow 0.3s ease;
+    box-shadow: 0 0 30px #00f0ff;
+  }
+
+  @keyframes auraPulse {
+    0% { box-shadow: 0 0 20px var(--aura-color, #00f0ff), inset 0 0 20px var(--aura-color, #00f0ff); }
+    50% { box-shadow: 0 0 60px var(--aura-color, #00f0ff), inset 0 0 40px var(--aura-color, #00f0ff); }
+    100% { box-shadow: 0 0 20px var(--aura-color, #00f0ff), inset 0 0 20px var(--aura-color, #00f0ff); }
+  }
+
+  #player {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 20px;
+    background: linear-gradient(90deg, #00c6ff, #0072ff);
+    border-radius: 10px;
+    box-shadow: 0 0 20px #00f0ff;
+  }
+
+  .energy, .poison, .buff {
+    position: absolute;
+    top: -30px;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .energy { background-image: url("asset gamenya/energy.png"); box-shadow: 0 0 20px cyan; }
+  .poison { background-image: url("asset gamenya/death.png"); box-shadow: 0 0 20px red; }
+
+  .buff.shield { background-image: url('asset gamenya/shield.png'); }
+  .buff.heart { background-image: url('asset gamenya/heart.png'); }
+  .buff.muscle { background-image: url('asset gamenya/strength.png'); }
+
+  #gameover {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2em;
+    display: none;
+    color: yellow;
+    text-align: center;
+  }
+  #gameover button {
+    margin-top: 15px;
+    padding: 8px 15px;
+    font-size: 1em;
+    border: none;
+    border-radius: 10px;
+    background: #00c6ff;
+    color: white;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  #gameover button:hover { background: #0072ff; }
+
+ /* Tombol kontrol */
+.control-btn {
+  position: absolute;
+  top: 10px;
+  width: 45px;
+  height: 45px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 2px solid white;
+  border-radius: 50%;
+  background-size: 60%;
+  background-position: center;
+  background-repeat: no-repeat;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+
+.control-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+
+#pauseBtn {
+  left: 10px;
+  top: 15px;
+  background-image: url("asset gamenya/pause.png");
+}
+
+#infoBtn {
+  right: 10px;
+  top: 15px;
+  background-image: url("asset gamenya/letter-i.png");
+}
+
+#infoPopup {
+  display: none;
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translate(-50%, -20%);
+  background: aquamarine;
+  padding: 20px;
+  border-radius: 15px;
+  width: 300px;
+  text-align: left;
+  border: 2px solid white;
+  color: black;
+}
+
+
+#infoPopup h3 {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+#infoPopup p {
+  display: flex;
+  align-items: center;   
+  gap: 8px;              
+  margin: 5px 0;
+}
+
+#infoPopup img {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;       
+}
+
+  
+  #infoPopup button {
+    margin-top: 10px;
+    padding: 5px 10px;
+    background: #00c6ff;
+    border: none;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  #infoPopup img {width: 20px; ;
+height: 20px;
+vertical-align: middle;
+margin-left: 5px;
+
+}
+
+  #info { margin-top: 10px; font-size: 1.2em; }
+  #score.gold { color: gold; }
+  #score.rainbow { background: linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet); -webkit-background-clip: text; color: transparent; }
+
+  /* Start Screen */
+  #startScreen {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: radial-gradient(circle at center, #0f2027, #203a43, #2c5364);
+    display: flex; justify-content: center; align-items: center;
+    color: white; z-index: 999;
+  }
+  #startInner {
+    text-align: center;
+    background: rgba(255,255,255,0.1);
+    padding: 30px;
+    border-radius: 20px;
+    border: 2px solid white;
+  }
+  #startBtn {
+    margin-top: 20px;
+    padding: 12px 30px;
+    font-size: 1.3em;
+    border: none;
+    border-radius: 15px;
+    background: linear-gradient(90deg, #00c6ff, #0072ff);
+    color: white;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  #startBtn:hover { background: #009fff; transform: scale(1.05); }
+
+  /* Flash merah */
+  @keyframes redFlash {
+    0% { background-color: rgba(255,0,0,0.5); }
+    100% { background-color: transparent; }
+  }
+
+
+
+  @media (max-width: 600px) {
+  #game {
+    height: 70vh;
+  }
+  #infoPopup {
+    width: 90%;
+    font-size: 0.9em;
+  }
+  #pauseBtn, #infoBtn {
+    width: 40px;
+    height: 40px;
+  }
+  #player {
+    width: 70px;
+  }
+}
+
+</style>
+</head>
+<body>
+<h1>⚡ Catch the Energy ⚡</h1>
+<div id="game">
+  <div id="player"></div>
+  <div id="gameover">
+    GAME OVER<br>
+    <small>better luck next time!</small><br>
+    <button onclick="restartGame()"><img src="asset gamenya/restart.png" width="20"></button>
+  </div>
+  <button id="pauseBtn" class="control-btn"></button>
+  <button id="infoBtn" class="control-btn"></button>
+  <div id="infoPopup">
+    <h3>🎮 Game Info</h3>
+    <p><img src="asset gamenya/energy.png"><b>Energy:</b> Increases score by 1</p>
+    <p><img src="asset gamenya/death.png"><b>Death:</b> Reduces lives by 1</p>
+    <p><img src="asset gamenya/strength.png"><b>Muscle:</b> Increases player size for 5 seconds</p>
+    <p><img src="asset gamenya/shield.png"><b>Shield:</b> Grants poison immunity for 5 seconds</p>
+    <p><img src="asset gamenya/heart.png"><b>Heart:</b> Add 1 Life</p>
+    <button onclick="closeInfo()">Close</button>
+  </div>
+</div>
+
+<div id="info">Score: <span id="score">0</span> | Lives: <span id="lives">3</span> | Best Score: <span id="best">0</span></div>
+
+<script>
+const game = document.getElementById("game");
+const player = document.getElementById("player");
+const scoreEl = document.getElementById("score");
+const livesEl = document.getElementById("lives");
+const bestEl = document.getElementById("best");
+const pauseBtn = document.getElementById("pauseBtn");
+const infoBtn = document.getElementById("infoBtn");
+const infoPopup = document.getElementById("infoPopup");
+const gameover = document.getElementById("gameover");
+
+let score = 0, lives = 3, paused = true, immune = false, buffActive = false;
+let fallSpeed = 5;
+let bestScore = localStorage.getItem("catch_bestscore") || 0;
+bestEl.textContent = bestScore;
+
+const catchSound = new Audio('asset gamenya/collect.wav');
+const hitSound = new Audio('asset gamenya/mixkit-sword-slash-swoosh-1476.mp3');
+const bgMusic = new Audio('asset gamenya/BGM.ogg');
+bgMusic.loop = true; bgMusic.volume = 0.5;
+
+game.addEventListener("mousemove", (e) => {
+  if (paused) return;
+  const rect = game.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const maxX = rect.width - player.offsetWidth;
+  player.style.left = Math.max(0, Math.min(x - player.offsetWidth / 2, maxX)) + "px";
+});
+
+// Gerak pake sentuhan (HP)
+game.addEventListener("touchmove", (e) => {
+  if (paused) return;
+  const touch = e.touches[0];
+  movePlayer(touch.clientX);
+});
+
+
+function movePlayer(clientX) {
+  const rect = game.getBoundingClientRect();
+  const x = clientX - rect.left;
+  const maxX = rect.width - player.offsetWidth;
+  player.style.left = Math.max(0, Math.min(x - player.offsetWidth / 2, maxX)) + "px";
+}
+
+function spawnItem() {
+  if (paused) return;
+  const item = document.createElement("div");
+  const isEnergy = Math.random() < 0.7;
+  item.classList.add(isEnergy ? "energy" : "poison");
+  item.style.left = Math.random() * (window.innerWidth - 30) + "px";
+  item.style.top = "0px";
+  game.appendChild(item);
+
+  let fall = setInterval(() => {
+    if (paused) return;
+    let top = parseInt(item.style.top || 0);
+    top += fallSpeed;
+    item.style.top = top + "px";
+
+    const itemRect = item.getBoundingClientRect();
+    const playerRect = player.getBoundingClientRect();
+
+    if (itemRect.bottom >= playerRect.top && itemRect.left < playerRect.right && itemRect.right > playerRect.left) {
+      if (isEnergy) {
+        score++;
+        catchSound.play();
+        auraIntensity();
+        if (score % 50 === 0) fallSpeed += 1;
+      } else if (!immune) {
+        lives--;
+        hitSound.play();
+        flashRed();
+      }
+
+      scoreEl.textContent = score;
+      livesEl.textContent = lives;
+      if (score > bestScore) {
+        bestScore = score;
+        localStorage.setItem("catch_bestscore", bestScore);
+        bestEl.textContent = bestScore;
+      }
+
+      if (score >= 100 && score < 500) scoreEl.className = "gold";
+      else if (score >= 500) scoreEl.className = "rainbow";
+
+      item.remove();
+      clearInterval(fall);
+      if (lives <= 0) endGame();
+      return;
+    }
+
+    if (itemRect.top > playerRect.bottom) { item.remove(); clearInterval(fall); }
+    if (top > window.innerHeight) { item.remove(); clearInterval(fall); }
+  }, 30);
+}
+
+function auraIntensity() {
+  let auraColor = "#00f0ff";
+  if (score >= 500) auraColor = "white";
+  else if (score >= 400) auraColor = "#ff00ff";
+  else if (score >= 300) auraColor = "#ff0000";
+  else if (score >= 200) auraColor = "#ffae00";
+  else if (score >= 100) auraColor = "#9d00ff";
+  game.style.setProperty("--aura-color", auraColor);
+  game.style.animation = "auraPulse 1s infinite";
+}
+
+function flashRed() {
+  game.style.animation = "redFlash 0.4s";
+  setTimeout(() => { game.style.animation = "auraPulse 1s infinite"; }, 400);
+}
+
+function endGame() {
+  gameover.style.display = "block";
+  paused = true;
+  bgMusic.pause();
+}
+
+function restartGame() { location.reload(); }
+
+infoBtn.addEventListener("click", () => {
+  infoPopup.style.display = "block";
+  paused = true;
+  bgMusic.pause();
+});
+function closeInfo() {
+  infoPopup.style.display = "none";
+  paused = false;
+  bgMusic.play().catch(()=>{});
+}
+
+const spawnLoop = setInterval(spawnItem, 700);
+
+// start screen
+const startScreen = document.createElement("div");
+startScreen.id = "startScreen";
+startScreen.innerHTML = `
+  <div id="startInner">
+    <h2>⚡ Catch the Energy ⚡</h2>
+    <p>Press START to play</p>
+    <button id="startBtn">▶️ START</button>
+  </div>`;
+document.body.appendChild(startScreen);
+document.getElementById("startBtn").addEventListener("click", () => {
+  startScreen.style.display = "none";
+  paused = false;
+  bgMusic.play().catch(()=>{});
+});
+pauseBtn.addEventListener("click", () => {
+  paused = !paused;
+  if (paused) {
+    bgMusic.pause();
+    pauseBtn.style.backgroundImage = "url('asset gamenya/play-button.png')";
+  } else {
+    bgMusic.play().catch(() => {});
+    pauseBtn.style.backgroundImage = "url('asset gamenya/pause.png')";
+  }
+});
+
+
+</script>
+</body>
+</html>
