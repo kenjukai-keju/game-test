@@ -68,7 +68,7 @@
     transform: translate(-50%, -50%);
     font-size: 2em;
     display: none;
-    color: yellow;
+    color: black;
     text-align: center;
   }
   #gameover button {
@@ -191,14 +191,14 @@
     <p><img src="asset gamenya/energy.png"> <b>Energy:</b> +1 Score</p>
     <p><img src="asset gamenya/death.png"> <b>Death Orb:</b> -1 Life</p>
     <hr>
-    <p><img src="asset gamenya/strength.png"> <b>Muscle:</b> Bigger Paddle (5s)</p>
+    <p><img src="asset gamenya/strength.png"> <b>Muscle:</b> Bigger Size (5s)</p>
     <p><img src="asset gamenya/shield.png"> <b>Shield:</b> Immune (5s)</p>
     <p><img src="asset gamenya/heart.png"> <b>Heart:</b> +1 Life</p>
     <button onclick="closeInfo()">Close</button>
   </div>
 </div>
 
-<div id="info">Skor: <span id="score">0</span> | Nyawa: <span id="lives">3</span> | Best: <span id="best">0</span></div>
+<div id="info">Score: <span id="score">0</span> | Lives: <span id="lives">3</span> | Best: <span id="best">0</span></div>
 
 <script>
 const game = document.getElementById("game");
@@ -352,3 +352,4 @@ document.getElementById("startBtn").addEventListener("click", ()=>{ startScreen.
 </script>
 </body>
 </html>
+
