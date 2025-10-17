@@ -99,61 +99,29 @@
   cursor: pointer;
   transition: 0.2s;
 }
-
-
 .control-btn:hover {
   background: rgba(255, 255, 255, 0.3);
   transform: scale(1.1);
 }
+#pauseBtn { left: 10px; top: 15px; background-image: url("asset gamenya/pause.png"); }
+#infoBtn { right: 10px; top: 15px; background-image: url("asset gamenya/letter-i.png"); }
 
-
-#pauseBtn {
-  left: 10px;
-  top: 15px;
-  background-image: url("asset gamenya/pause.png");
-}
-
-#infoBtn {
-  right: 10px;
-  top: 15px;
-  background-image: url("asset gamenya/letter-i.png");
-}
-
-#infoPopup {
-  display: none;
-  position: absolute;
-  top: 20%;
-  left: 50%;
-  transform: translate(-50%, -20%);
-  background: aquamarine;
-  padding: 20px;
-  border-radius: 15px;
-  width: 300px;
-  text-align: left;
-  border: 2px solid white;
-  color: black;
-}
-
-
-#infoPopup h3 {
-  text-align: center;
-  margin-bottom: 10px;
-}
-
-#infoPopup p {
-  display: flex;
-  align-items: center;   
-  gap: 8px;              
-  margin: 5px 0;
-}
-
-#infoPopup img {
-  width: 22px;
-  height: 22px;
-  flex-shrink: 0;       
-}
-
-  
+  #infoPopup {
+    display: none;
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -20%);
+    background: aquamarine;
+    padding: 15px;
+    border-radius: 15px;
+    width: 280px;
+    text-align: left;
+    border: 2px solid white;
+    color: black;
+    font-size: 0.9em;
+  }
+  #infoPopup img { width: 20px; vertical-align: middle; margin-right: 5px; }
   #infoPopup button {
     margin-top: 10px;
     padding: 5px 10px;
@@ -164,18 +132,15 @@
     cursor: pointer;
   }
 
-  #infoPopup img {width: 20px; ;
-height: 20px;
-vertical-align: middle;
-margin-left: 5px;
-
-}
-
   #info { margin-top: 10px; font-size: 1.2em; }
   #score.gold { color: gold; }
-  #score.rainbow { background: linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet); -webkit-background-clip: text; color: transparent; }
+  #score.rainbow {
+    background: linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
 
-  /* Start Screen */
   #startScreen {
     position: fixed;
     top: 0; left: 0;
@@ -204,31 +169,10 @@ margin-left: 5px;
   }
   #startBtn:hover { background: #009fff; transform: scale(1.05); }
 
-  /* Flash merah */
   @keyframes redFlash {
     0% { background-color: rgba(255,0,0,0.5); }
     100% { background-color: transparent; }
   }
-
-
-
-  @media (max-width: 600px) {
-  #game {
-    height: 70vh;
-  }
-  #infoPopup {
-    width: 90%;
-    font-size: 0.9em;
-  }
-  #pauseBtn, #infoBtn {
-    width: 40px;
-    height: 40px;
-  }
-  #player {
-    width: 70px;
-  }
-}
-
 </style>
 </head>
 <body>
@@ -244,16 +188,17 @@ margin-left: 5px;
   <button id="infoBtn" class="control-btn"></button>
   <div id="infoPopup">
     <h3>🎮 Game Info</h3>
-    <p><img src="asset gamenya/energy.png"><b>Energy:</b> Increases score by 1</p>
-    <p><img src="asset gamenya/death.png"><b>Death:</b> Reduces lives by 1</p>
-    <p><img src="asset gamenya/strength.png"><b>Muscle:</b> Increases player size for 5 seconds</p>
-    <p><img src="asset gamenya/shield.png"><b>Shield:</b> Grants poison immunity for 5 seconds</p>
-    <p><img src="asset gamenya/heart.png"><b>Heart:</b> Add 1 Life</p>
+    <p><img src="asset gamenya/energy.png"> <b>Energy:</b> +1 Score</p>
+    <p><img src="asset gamenya/death.png"> <b>Death Orb:</b> -1 Life</p>
+    <hr>
+    <p><img src="asset gamenya/strength.png"> <b>Muscle:</b> Bigger Paddle (5s)</p>
+    <p><img src="asset gamenya/shield.png"> <b>Shield:</b> Immune (5s)</p>
+    <p><img src="asset gamenya/heart.png"> <b>Heart:</b> +1 Life</p>
     <button onclick="closeInfo()">Close</button>
   </div>
 </div>
 
-<div id="info">Score: <span id="score">0</span> | Lives: <span id="lives">3</span> | Best Score: <span id="best">0</span></div>
+<div id="info">Skor: <span id="score">0</span> | Nyawa: <span id="lives">3</span> | Best: <span id="best">0</span></div>
 
 <script>
 const game = document.getElementById("game");
@@ -266,7 +211,7 @@ const infoBtn = document.getElementById("infoBtn");
 const infoPopup = document.getElementById("infoPopup");
 const gameover = document.getElementById("gameover");
 
-let score = 0, lives = 3, paused = true, immune = false, buffActive = false;
+let score = 0, lives = 3, paused = true, immune = false;
 let fallSpeed = 5;
 let bestScore = localStorage.getItem("catch_bestscore") || 0;
 bestEl.textContent = bestScore;
@@ -284,26 +229,27 @@ game.addEventListener("mousemove", (e) => {
   player.style.left = Math.max(0, Math.min(x - player.offsetWidth / 2, maxX)) + "px";
 });
 
-// Gerak pake sentuhan (HP)
+// touch support
 game.addEventListener("touchmove", (e) => {
   if (paused) return;
-  const touch = e.touches[0];
-  movePlayer(touch.clientX);
-});
-
-
-function movePlayer(clientX) {
   const rect = game.getBoundingClientRect();
-  const x = clientX - rect.left;
+  const x = e.touches[0].clientX - rect.left;
   const maxX = rect.width - player.offsetWidth;
   player.style.left = Math.max(0, Math.min(x - player.offsetWidth / 2, maxX)) + "px";
-}
+});
 
 function spawnItem() {
   if (paused) return;
   const item = document.createElement("div");
-  const isEnergy = Math.random() < 0.7;
-  item.classList.add(isEnergy ? "energy" : "poison");
+  const rand = Math.random();
+  if (rand < 0.7) item.classList.add("energy");
+  else if (rand < 0.9) item.classList.add("poison");
+  else {
+    const buffs = ["shield", "heart", "muscle"];
+    const type = buffs[Math.floor(Math.random() * buffs.length)];
+    item.classList.add("buff", type);
+  }
+
   item.style.left = Math.random() * (window.innerWidth - 30) + "px";
   item.style.top = "0px";
   game.appendChild(item);
@@ -318,36 +264,36 @@ function spawnItem() {
     const playerRect = player.getBoundingClientRect();
 
     if (itemRect.bottom >= playerRect.top && itemRect.left < playerRect.right && itemRect.right > playerRect.left) {
-      if (isEnergy) {
-        score++;
-        catchSound.play();
-        auraIntensity();
-        if (score % 50 === 0) fallSpeed += 1;
-      } else if (!immune) {
-        lives--;
-        hitSound.play();
-        flashRed();
+      if (item.classList.contains("energy")) {
+        score++; catchSound.play(); auraIntensity(); if (score % 50 === 0) fallSpeed++;
+      } else if (item.classList.contains("poison") && !immune) {
+        lives--; hitSound.play(); flashRed();
+      } else if (item.classList.contains("buff")) {
+        const type = item.classList[1];
+        if (type === "shield") {
+          immune = true;
+          player.style.boxShadow = "0 0 25px lime";
+          setTimeout(()=>{ immune=false; player.style.boxShadow="0 0 20px #00f0ff"; },5000);
+        } else if (type === "heart") {
+          lives++;
+        } else if (type === "muscle") {
+          player.style.transform = "translateX(-50%) scaleX(1.5)";
+          setTimeout(()=>{ player.style.transform = "translateX(-50%) scaleX(1)"; },5000);
+        }
       }
 
       scoreEl.textContent = score;
       livesEl.textContent = lives;
-      if (score > bestScore) {
-        bestScore = score;
-        localStorage.setItem("catch_bestscore", bestScore);
-        bestEl.textContent = bestScore;
-      }
-
+      if (score > bestScore) { bestScore = score; localStorage.setItem("catch_bestscore", bestScore); bestEl.textContent = bestScore; }
       if (score >= 100 && score < 500) scoreEl.className = "gold";
       else if (score >= 500) scoreEl.className = "rainbow";
 
-      item.remove();
-      clearInterval(fall);
+      item.remove(); clearInterval(fall);
       if (lives <= 0) endGame();
       return;
     }
 
     if (itemRect.top > playerRect.bottom) { item.remove(); clearInterval(fall); }
-    if (top > window.innerHeight) { item.remove(); clearInterval(fall); }
   }, 30);
 }
 
@@ -372,23 +318,27 @@ function endGame() {
   paused = true;
   bgMusic.pause();
 }
-
 function restartGame() { location.reload(); }
 
-infoBtn.addEventListener("click", () => {
-  infoPopup.style.display = "block";
-  paused = true;
-  bgMusic.pause();
-});
-function closeInfo() {
-  infoPopup.style.display = "none";
-  paused = false;
-  bgMusic.play().catch(()=>{});
+pauseBtn.addEventListener("click", togglePause);
+pauseBtn.addEventListener("touchstart", togglePause);
+function togglePause() {
+  paused = !paused;
+  if (paused) {
+    bgMusic.pause();
+    pauseBtn.style.backgroundImage = "url('asset gamenya/play-button.png')";
+  } else {
+    bgMusic.play().catch(()=>{});
+    pauseBtn.style.backgroundImage = "url('asset gamenya/pause.png')";
+  }
 }
+
+infoBtn.addEventListener("click", ()=>{ infoPopup.style.display="block"; paused=true; bgMusic.pause(); });
+infoBtn.addEventListener("touchstart", ()=>{ infoPopup.style.display="block"; paused=true; bgMusic.pause(); });
+function closeInfo() { infoPopup.style.display="none"; paused=false; bgMusic.play().catch(()=>{}); }
 
 const spawnLoop = setInterval(spawnItem, 700);
 
-// start screen
 const startScreen = document.createElement("div");
 startScreen.id = "startScreen";
 startScreen.innerHTML = `
@@ -398,23 +348,7 @@ startScreen.innerHTML = `
     <button id="startBtn">▶️ START</button>
   </div>`;
 document.body.appendChild(startScreen);
-document.getElementById("startBtn").addEventListener("click", () => {
-  startScreen.style.display = "none";
-  paused = false;
-  bgMusic.play().catch(()=>{});
-});
-pauseBtn.addEventListener("click", () => {
-  paused = !paused;
-  if (paused) {
-    bgMusic.pause();
-    pauseBtn.style.backgroundImage = "url('asset gamenya/play-button.png')";
-  } else {
-    bgMusic.play().catch(() => {});
-    pauseBtn.style.backgroundImage = "url('asset gamenya/pause.png')";
-  }
-});
-
-
+document.getElementById("startBtn").addEventListener("click", ()=>{ startScreen.style.display="none"; paused=false; bgMusic.play().catch(()=>{}); });
 </script>
 </body>
 </html>
